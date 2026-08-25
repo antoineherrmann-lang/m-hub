@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mello Hub">
+<meta name="theme-color" content="#007AFF">
+<title>Mello Hub</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" href="./favicon-32.png" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --surface:#F7F7F9;
+    --card:#FFFFFF;
+    --card-glass:rgba(255,255,255,0.66);
+    --glass-bg:rgba(255,255,255,0.55);
+    --glass-border:rgba(255,255,255,0.7);
+    --ink:#000000;
+    --muted:rgba(60,60,67,0.6);
+    --border:rgba(60,60,67,0.14);
+    --accent:#007AFF;
+    --accent-2:#5AC8FA;
+    --accent-soft:rgba(0,122,255,0.12);
+    --positive:#34C759;
+    --positive-soft:rgba(52,199,89,0.14);
+    --negative:#FF3B30;
+    --negative-soft:rgba(255,59,48,0.12);
+    --alert:#FF9500;
+    --alert-soft:rgba(255,149,0,0.14);
+    --violet:#AF52DE;
+    --violet-soft:rgba(175,82,222,0.12);
+    --radius:18px;
+    --radius-sm:13px;
+    --shadow-soft: 0 1px 3px rgba(14,27,44,0.05);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100dvh;
+    -webkit-font-smoothing:antialiased;
+    letter-spacing:-0.005em;
+    transition:background .3s ease, color .3s ease;
+  }
+  h1,h2,h3,h4{font-weight:600;margin:0;letter-spacing:-0.02em;}
+  p{margin:0;}
+  button{font-family:inherit;}
+  a{color:inherit;}
+  ::selection{background:var(--accent-soft);}
+
+  html,body{width:100%;background:var(--bg);}
+  #app.shell{display:flex;min-height:100dvh;}
+
+  /* ---------- Sidebar / Nav (shared markup, two layouts) ---------- */
+  .sidebar{
+    width:236px;flex-shrink:0;position:sticky;top:0;height:100dvh;
+    padding:1.5rem 1rem;display:flex;flex-direction:column;gap:1.75rem;
+    border-right:1px solid var(--border);
+  }
+  .brand{display:flex;align-items:center;gap:.65rem;padding:0 .35rem;}
+  .brand-badge{
+    width:38px;height:38px;border-radius:11px;flex-shrink:0;display:block;object-fit:cover;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 10px rgba(8,26,52,0.35);
+  }
+  .brand-name{font-weight:600;font-size:1rem;line-height:1.1;}
+  .brand-sub{font-size:.68rem;color:var(--muted);font-weight:500;}
+
+  .nav-shell{flex:1;min-height:0;display:flex;flex-direction:column;gap:.6rem;}
+  .nav{
+    position:relative;display:flex;flex-direction:column;gap:.15rem;padding:.35rem;border-radius:var(--radius);
+    background:var(--glass-bg);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid var(--glass-border);box-shadow:0 1px 2px rgba(0,0,0,0.04);
+  }
+  .nav-secondary{
+    margin-top:auto;display:flex;flex-direction:column;padding:.35rem;border-radius:var(--radius);
+    background:var(--glass-bg);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid var(--glass-border);box-shadow:0 1px 2px rgba(0,0,0,0.04);
+  }
+  .nav-pill{
+    position:absolute;top:0;left:0;border-radius:9px;z-index:0;
+    background: var(--card);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  }
+  .nav-item{
+    position:relative;z-index:1;display:flex;align-items:center;gap:.7rem;
+    padding:.62rem .75rem;border-radius:9px;cursor:pointer;color:var(--muted);
+    font-size:.86rem;font-weight:500;transition:color .2s ease;user-select:none;
+  }
+  .nav-item svg{width:18px;height:18px;flex-shrink:0;}
+  .nav-item.active{color:var(--ink);}
+  .nav-item:not(.active):hover{color:var(--ink);}
+  .nav-secondary .nav-item{z-index:auto;}
+  .nav-secondary .nav-item.active{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.10);}
+  .nav-secondary .nav-item:not(.active):hover{background:var(--card);}
+  .nav-label-full{display:inline;}
+  .nav-label-compact{display:none;}
+
+  .sidebar-foot{display:flex;flex-direction:column;gap:.6rem;}
+  .foot-note{font-size:.66rem;color:var(--muted);padding:0 .35rem;line-height:1.4;}
+
+  /* ---------- Main content ---------- */
+  .main{flex:1;min-width:0;max-width:1360px;padding:calc(1.75rem + env(safe-area-inset-top, 0px)) 2.25rem calc(3rem + env(safe-area-inset-bottom,0px));}
+  .topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.75rem;flex-wrap:wrap;}
+  .eyebrow{font-size:.72rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;}
+  .page-title{font-size:1.7rem;}
+  .page-sub{color:var(--muted);font-size:.88rem;margin-top:.35rem;}
+  .topbar-actions{display:flex;gap:.6rem;align-items:center;}
+
+  .btn{
+    border:none;border-radius:999px;padding:.65rem 1.15rem;font-weight:500;font-size:.85rem;cursor:pointer;
+    display:inline-flex;align-items:center;gap:.45rem;transition:transform .15s ease, filter .15s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--accent);color:#fff;box-shadow:none;}
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-block{width:100%;justify-content:center;}
+  .btn-ghost{background:var(--card);color:var(--ink);border:1px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--accent);}
+  .btn-danger-text{background:transparent;color:var(--negative);padding:.4rem .5rem;}
+  .btn svg{width:15px;height:15px;}
+
+  .segmented{
+    display:inline-flex;gap:.2rem;padding:.25rem;border-radius:14px;
+    background:var(--glass-bg);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid var(--glass-border);
+  }
+  .segmented button{
+    border:none;background:transparent;padding:.5rem .9rem;border-radius:10px;
+    font-size:.8rem;font-weight:500;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:.45rem;
+    transition:background .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .segmented button svg{width:15px;height:15px;flex-shrink:0;}
+  .segmented button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+
+  /* ---------- Cards / grid ---------- */
+  .grid{display:grid;gap:1rem;}
+  .kpi-grid{grid-template-columns:repeat(4,1fr);margin-bottom:1.4rem;}
+  .card{
+    background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);
+    padding:1.15rem 1.3rem;box-shadow:var(--shadow-soft);
+  }
+  .kpi-card{
+    display:flex;flex-direction:column;gap:.9rem;
+    border-radius:18px;padding:1.2rem 1.3rem;min-height:136px;
+    background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow-soft);color:var(--ink);
+    justify-content:flex-start;
+  }
+  .kpi-icon-badge{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .kpi-icon-badge svg{width:18px;height:18px;}
+  .kpi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;}
+  .kpi-card-label{font-size:.83rem;font-weight:500;color:var(--muted);}
+  .kpi-value-row{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap;margin-top:auto;}
+  .kpi-value{font-size:1.65rem;font-weight:600;letter-spacing:-0.02em;color:var(--ink);}
+  .kpi-value-sub{font-size:.78rem;font-weight:500;color:var(--muted);}
+
+  .section-title{font-size:1rem;font-weight:600;margin:0 0 .85rem;display:flex;align-items:center;justify-content:space-between;}
+  .section-title span.count{color:var(--muted);font-weight:500;font-size:.8rem;}
+
+  .two-col{display:grid;grid-template-columns:1.35fr 1fr;gap:1rem;align-items:start;}
+
+  /* Upcoming offer list — pill rows */
+  .offer-mini{
+    display:flex;align-items:center;gap:.85rem;padding:.75rem .9rem;border-radius:16px;
+    border:1px solid var(--border);background:var(--surface);transition:border-color .15s ease, background .15s ease;
+  }
+  .offer-mini + .offer-mini{margin-top:.55rem;}
+  .offer-mini:hover{border-color:var(--accent);background:var(--accent-soft);}
+  .offer-dot{
+    width:38px;height:38px;border-radius:50%;flex-shrink:0;
+    box-shadow:inset 0 0 0 3px rgba(255,255,255,0.4);
+  }
+  .offer-mini-title{font-weight:500;font-size:.86rem;}
+  .offer-mini-sub{font-size:.74rem;color:var(--muted);margin-top:.1rem;}
+  .offer-mini-badge{margin-left:auto;font-size:.7rem;font-weight:600;padding:.28rem .6rem;border-radius:20px;white-space:nowrap;}
+  .empty-state{padding:2rem 1rem;text-align:center;color:var(--muted);font-size:.85rem;}
+  .empty-state svg{width:32px;height:32px;margin-bottom:.6rem;opacity:.5;}
+
+  /* Bar chart */
+  .chart-wrap{position:relative;}
+  .bar-row{display:flex;align-items:flex-end;gap:.65rem;height:120px;padding-top:.5rem;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:.4rem;height:100%;justify-content:flex-end;}
+  .bar-shape{width:100%;max-width:34px;border-radius:7px 7px 3px 3px;background:linear-gradient(180deg,var(--accent-2),var(--accent));min-height:4px;}
+  .bar-label{font-size:.66rem;color:var(--muted);font-weight:600;}
+
+  /* ---------- Tables ---------- */
+  .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow-soft);}
+  table{width:100%;border-collapse:collapse;min-width:640px;}
+  thead th{
+    text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+    font-weight:600;padding:.85rem 1rem;border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  tbody td{padding:.8rem 1rem;font-size:.86rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--accent-soft);}
+  .cell-title{font-weight:500;}
+  .cell-sub{color:var(--muted);font-size:.72rem;margin-top:.15rem;}
+  .badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:600;padding:.3rem .65rem;border-radius:20px;}
+  .row-actions{display:flex;gap:.3rem;justify-content:flex-end;}
+  .icon-btn{
+    width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .icon-btn:hover{background:var(--accent-soft);color:var(--accent);}
+  .icon-btn.danger:hover{background:var(--negative-soft);color:var(--negative);}
+  .icon-btn svg{width:15px;height:15px;}
+  .tag-chip{font-size:.7rem;font-weight:600;padding:.22rem .55rem;border-radius:8px;background:var(--accent-soft);color:var(--accent);}
+
+  /* ---------- Calendar ---------- */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .cal-nav{display:flex;gap:.4rem;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;}
+  .cal-dow{font-size:.66rem;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:center;padding-bottom:.4rem;}
+  .cal-day{
+    min-height:92px;border-radius:11px;border:none;padding:.4rem .4rem .35rem;position:relative;
+    cursor:pointer;background:var(--surface);color:var(--ink);
+    display:flex;flex-direction:column;gap:.25rem;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .cal-day.outside{opacity:.3;cursor:default;min-height:auto;}
+  .cal-day:hover:not(.outside){transform:translateY(-1px);}
+  .cal-day-top{display:flex;align-items:center;justify-content:space-between;}
+  .cal-day-num{font-size:.76rem;font-weight:500;color:var(--muted);}
+  .cal-day.today .cal-day-num{color:var(--accent);font-weight:700;}
+  .cal-day.selected{box-shadow:0 0 0 2px var(--ink);}
+  .cal-day-offers{display:flex;flex-direction:column;gap:.2rem;flex:1;min-height:0;overflow:hidden;}
+  .cal-offer-chip{
+    font-size:.62rem;font-weight:600;padding:.15rem .35rem;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .cal-offer-more{font-size:.6rem;color:var(--muted);font-weight:500;padding:0 .3rem;}
+  .cal-day-markers{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:auto;padding-top:.2rem;}
+  .cal-marker-dot{width:15px;height:15px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;}
+  .cal-marker-dot svg{width:8px;height:8px;}
+  .cal-marker-more{font-size:.58rem;color:var(--muted);font-weight:600;}
+  .cal-day-popover{
+    position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%) translateY(4px) scale(.96);
+    min-width:170px;max-width:230px;background:var(--card-glass);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid var(--border);border-radius:14px;padding:.65rem .75rem;box-shadow:0 12px 30px rgba(0,0,0,0.14);
+    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease, transform .16s ease;z-index:30;text-align:left;
+  }
+  @media (hover:hover){
+    .cal-day:hover .cal-day-popover{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0) scale(1);}
+  }
+  .cal-popover-date{font-size:.68rem;font-weight:600;color:var(--muted);margin-bottom:.35rem;}
+  .cal-popover-row{display:flex;align-items:center;gap:.4rem;font-size:.74rem;font-weight:500;color:var(--ink);padding:.15rem 0;}
+  .cal-popover-row.muted{color:var(--muted);font-weight:500;}
+  .cal-popover-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .cal-day-list{margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border);}
+  .day-markers-section{margin-top:1rem;padding-top:.85rem;border-top:1px dashed var(--border);}
+  .day-markers-head{display:flex;align-items:center;justify-content:space-between;font-size:.82rem;font-weight:600;margin-bottom:.5rem;}
+  .marker-chip{display:flex;align-items:center;gap:.6rem;padding:.4rem .2rem;font-size:.82rem;}
+  .marker-chip span:nth-child(2){flex:1;}
+  .marker-chip-icon{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .marker-chip-icon svg{width:13px;height:13px;}
+  .marker-type-row{
+    display:flex;flex-wrap:wrap;gap:.2rem;padding:.25rem;border-radius:14px;
+    background:var(--glass-bg);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid var(--glass-border);
+  }
+  .marker-type-btn{
+    flex:1 1 70px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;padding:.6rem .4rem;min-height:64px;
+    border-radius:10px;border:none;background:transparent;color:var(--muted);cursor:pointer;
+    font-family:inherit;font-size:.68rem;font-weight:500;transition:background .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .marker-type-btn svg{width:16px;height:16px;}
+  .marker-type-btn.selected{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+
+  /* Résumé des durées */
+  .duration-row{display:flex;align-items:center;gap:.65rem;padding:.65rem 0;border-bottom:1px solid var(--border);}
+  .duration-row:last-child{border-bottom:none;}
+  .duration-title{font-weight:500;font-size:.85rem;flex:1;}
+  .duration-value{font-size:.78rem;color:var(--muted);}
+
+  /* Sous-offres (dans la modale + affichage) */
+  .suboffer-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.6rem;}
+  .suboffer-chip{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:.4rem .6rem;font-size:.82rem;}
+  .suboffer-add-row{display:flex;gap:.5rem;}
+  .suboffer-add-row input{flex:1;padding:.55rem .7rem;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-family:inherit;font-size:.85rem;}
+  .suboffer-add-row input:focus{outline:none;border-color:var(--accent);}
+  .sub-offer-chips{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem;}
+
+  /* ---------- Omnibus — suivi produits / variantes ---------- */
+  .add-col-btn{
+    display:flex;align-items:center;justify-content:center;gap:.4rem;min-width:120px;border:1.5px dashed var(--border);
+    border-radius:10px;color:var(--muted);font-size:.8rem;font-weight:600;cursor:pointer;padding:.7rem;background:transparent;
+  }
+  .add-col-btn svg{width:14px;height:14px;flex-shrink:0;}
+  .add-col-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .product-name-input{
+    border:none;background:transparent;font-family:inherit;font-weight:600;font-size:.95rem;color:var(--ink);
+    padding:.2rem .3rem;border-radius:7px;max-width:70%;
+  }
+  .product-name-input:hover{background:var(--surface);}
+  .product-name-input:focus{outline:none;background:var(--surface);box-shadow:0 0 0 2px var(--accent-soft);}
+  .variant-row{border:1px solid var(--border);border-radius:12px;padding:.6rem .75rem;background:var(--surface);}
+  .variant-row + .variant-row{margin-top:.4rem;}
+  .variant-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;}
+  .variant-name-input{
+    border:none;background:transparent;font-family:inherit;font-weight:600;font-size:.84rem;color:var(--ink);
+    padding:.15rem .3rem;border-radius:6px;max-width:180px;
+  }
+  .variant-name-input:hover{background:var(--card);}
+  .variant-name-input:focus{outline:none;background:var(--card);box-shadow:0 0 0 2px var(--accent-soft);}
+  .variant-badges{display:flex;align-items:center;gap:.45rem;flex-shrink:0;}
+  .variant-status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .variant-warning{color:var(--alert);display:flex;cursor:help;}
+  .variant-warning svg{width:15px;height:15px;}
+  .variant-bottom{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;margin-top:.4rem;}
+  .variant-since{font-size:.74rem;color:var(--muted);}
+  .variant-since strong{color:var(--ink);font-weight:600;}
+  .variant-actions{display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;}
+  .btn-sm{padding:.35rem .65rem;font-size:.72rem;}
+  .variant-history{margin-top:.5rem;padding-top:.45rem;border-top:1px dashed var(--border);}
+  .variant-history-item{display:flex;justify-content:space-between;padding:.2rem 0;font-size:.74rem;color:var(--muted);}
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(6,12,24,0.45);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s ease;
+  }
+  .modal-backdrop.open{opacity:1;pointer-events:auto;}
+  .modal{
+    background:var(--card);border-radius:18px;width:100%;max-width:440px;padding:1.5rem;
+    box-shadow:0 24px 60px rgba(0,0,0,0.3);transform:translateY(12px) scale(.98);opacity:0;transition:all .25s cubic-bezier(.34,1.56,.64,1);
+    max-height:88vh;overflow-y:auto;
+  }
+  .modal-backdrop.open .modal{transform:translateY(0) scale(1);opacity:1;}
+  .modal-title{font-size:1.05rem;margin-bottom:1.1rem;}
+  .field{margin-bottom:.9rem;}
+  .field label{display:block;font-size:.76rem;font-weight:600;color:var(--muted);margin-bottom:.4rem;}
+  .field input[type=text], .field input[type=date], .field select, .field textarea{
+    width:100%;padding:.65rem .75rem;border-radius:10px;border:1px solid var(--border);background:var(--surface);
+    color:var(--ink);font-family:inherit;font-size:.85rem;
+  }
+  .field textarea{resize:vertical;min-height:64px;line-height:1.5;}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--accent);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+  .swatch-row{display:flex;gap:.5rem;}
+  .swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+  .emoji-field-row input{
+    width:100%;padding:.65rem .75rem;border-radius:10px;border:1px solid var(--border);background:var(--surface);
+    color:var(--ink);font-family:inherit;font-size:1.1rem;text-align:center;max-width:90px;margin-bottom:.55rem;
+  }
+  .emoji-field-row input:focus{outline:none;border-color:var(--accent);}
+  .emoji-suggestions{display:flex;flex-wrap:wrap;gap:.35rem;}
+  .emoji-suggestion-btn{
+    width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);
+    font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .emoji-suggestion-btn:hover{border-color:var(--accent);}
+  .swatch.selected{border-color:var(--ink);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.3rem;}
+
+  /* toast */
+  .toast-wrap{position:fixed;bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:.5rem;align-items:center;}
+  .toast{
+    background:var(--card-glass);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+    border:0.5px solid var(--border);color:var(--ink);padding:.7rem 1.1rem;border-radius:30px;font-size:.82rem;font-weight:600;
+    box-shadow:0 10px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.4);
+    display:flex;align-items:center;gap:.5rem;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .toast.error{color:var(--negative);}
+  .toast.success{color:var(--positive);}
+
+  .view-fade{animation:viewFade .38s cubic-bezier(.22,.9,.32,1) both;}
+  @keyframes viewFade{from{opacity:0;filter:blur(8px);transform:scale(.99);}to{opacity:1;filter:blur(0);transform:scale(1);}}
+
+  /* ---------- Lock screen ---------- */
+  .lock-screen{
+    width:100%;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:1.5rem;
+    background:var(--bg);position:relative;overflow:hidden;
+  }
+  .lock-blob{position:absolute;border-radius:50%;filter:blur(70px);}
+  .lock-blob.b1{width:360px;height:360px;background:var(--accent);opacity:.16;top:-100px;left:-80px;animation:blobDrift 20s ease-in-out infinite;}
+  .lock-blob.b2{width:320px;height:320px;background:var(--accent-2);opacity:.14;bottom:-120px;right:-80px;animation:blobDrift 20s ease-in-out infinite -7s;}
+  .lock-blob.b3{width:280px;height:280px;background:#5E8BFF;opacity:.10;bottom:18%;left:8%;animation:blobDrift 20s ease-in-out infinite -13s;}
+  @keyframes blobDrift{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(22px,-16px) scale(1.08);}}
+  .lock-card{
+    position:relative;z-index:1;width:100%;max-width:360px;padding:2.2rem 1.9rem;border-radius:26px;
+    background:var(--card-glass);-webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);
+    border:1px solid var(--border);box-shadow:0 20px 50px rgba(0,0,0,0.10);
+    text-align:center;color:var(--ink);
+    animation:lockCardIn .5s cubic-bezier(.22,.9,.32,1) both;
+  }
+  @keyframes lockCardIn{from{opacity:0;transform:translateY(14px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .lock-badge{
+    width:60px;height:60px;border-radius:16px;margin:0 auto 1.2rem;display:block;object-fit:cover;
+    box-shadow:0 8px 24px rgba(0,0,0,0.14);animation:lockBadgeIn .6s cubic-bezier(.28,1.1,.4,1) .08s both;
+  }
+  @keyframes lockBadgeIn{from{opacity:0;transform:scale(.72) translateY(-6px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .lock-title{font-size:1.15rem;font-weight:600;margin-bottom:.3rem;color:var(--ink);}
+  .lock-sub{font-size:.8rem;color:var(--muted);margin-bottom:1.6rem;}
+  .lock-field{position:relative;margin-bottom:.9rem;}
+  .lock-field input{
+    width:100%;padding:.85rem 1rem;border-radius:14px;border:1px solid var(--border);
+    background:var(--surface);color:var(--ink);font-family:inherit;font-size:.92rem;text-align:center;
+    letter-spacing:.04em;transition:box-shadow .2s ease, border-color .2s ease;
+  }
+  .lock-field input::placeholder{color:var(--muted);}
+  .lock-field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
+  .lock-error{font-size:.76rem;color:var(--negative);min-height:1.1rem;margin-bottom:.6rem;}
+  .lock-remember{color:var(--muted);}
+  .lock-remember input{accent-color:var(--accent);}
+  .lock-shake{animation:shake .4s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}40%{transform:translateX(8px);}60%{transform:translateX(-6px);}80%{transform:translateX(6px);}}
+
+  /* ---------- Réglages ---------- */
+  .settings-stack{display:flex;flex-direction:column;gap:1.1rem;}
+  .settings-row{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 0;border-bottom:1px solid var(--border);gap:1.5rem;flex-wrap:wrap;}
+  .settings-row:last-child{border-bottom:none;}
+  .settings-label{font-weight:500;font-size:.88rem;}
+  .settings-sub{font-size:.76rem;color:var(--muted);margin-top:.15rem;}
+  .version-pill{font-size:.72rem;font-weight:600;padding:.3rem .7rem;border-radius:20px;background:var(--accent-soft);color:var(--accent);}
+  .version-pill-btn{
+    display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:500;padding:.25rem .4rem;
+    border-radius:8px;background:transparent;color:var(--muted);border:none;cursor:pointer;font-family:inherit;
+    transition:background .15s ease, color .15s ease;
+  }
+  .version-pill-btn:hover{background:var(--surface);color:var(--ink);}
+  .version-pill-btn svg{width:11px;height:11px;transition:transform .2s ease;opacity:.7;}
+  .changelog-list{margin-top:.4rem;padding-top:.4rem;border-top:1px solid var(--border);animation:viewFade .25s ease both;}
+  .changelog-item{padding:.75rem 0;border-bottom:1px solid var(--border);}
+  .changelog-item:last-child{border-bottom:none;}
+  .changelog-version{font-weight:600;font-size:.85rem;}
+  .changelog-date{font-size:.72rem;color:var(--muted);margin-left:.5rem;}
+  .changelog-notes{font-size:.8rem;color:var(--muted);margin-top:.3rem;line-height:1.5;}
+
+  /* =========================================================
+     Responsive — 4 paliers cohérents
+     Desktop (>1100px) · Tablette (761–1100px) · Mobile (≤760px) · Petit mobile (≤420px)
+     ========================================================= */
+
+  /* ---- Tablette : la nav latérale reste, mais l'espace se resserre ---- */
+  @media (max-width:1100px){
+    .main{padding:calc(1.5rem + env(safe-area-inset-top, 0px)) 1.5rem calc(2.5rem + env(safe-area-inset-bottom,0px));}
+    .sidebar{width:208px;padding:1.25rem .85rem;}
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .two-col{grid-template-columns:1fr;}
+    .settings-stack{max-width:none;}
+  }
+
+  /* ---- Mobile : bascule vers la barre flottante en bas ---- */
+  @media (max-width:760px){
+    #app.shell{display:block;}
+    .sidebar{
+      position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;width:auto;flex-direction:row;
+      padding:.6rem 1rem calc(.6rem + env(safe-area-inset-bottom,0px));border-right:none;border-top:none;
+      background:transparent;z-index:40;justify-content:center;gap:0;
+    }
+    .brand,.sidebar-foot{display:none;}
+    .nav-shell{
+      flex:none;flex-direction:row;width:fit-content;margin:0 auto;
+      background:var(--card-glass);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+      border:0.5px solid var(--border);box-shadow:0 10px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.3);
+      border-radius:18px;padding:.2rem;gap:0;
+    }
+    .nav, .nav-secondary{
+      flex-direction:row;background:transparent;border:none;box-shadow:none;padding:0;border-radius:0;margin-top:0;
+    }
+    .nav-item{flex-direction:column;gap:.2rem;padding:.5rem .95rem;font-size:.63rem;}
+    .nav-label-full{display:none;}
+    .nav-label-compact{display:inline;}
+    .main{padding:calc(1.25rem + env(safe-area-inset-top,0px)) 1.1rem 6.5rem;}
+    .page-title{font-size:1.4rem;}
+    .kpi-grid{grid-template-columns:repeat(2,1fr);gap:.75rem;}
+    .kpi-card{padding:1.05rem 1.15rem;min-height:128px;border-radius:18px;}
+    .kpi-value{font-size:1.4rem;}
+    .card{padding:1rem 1.1rem;}
+    .topbar{margin-bottom:1.25rem;}
+    .topbar-actions{width:100%;}
+    .modal{padding:1.25rem;}
+    .field-row{grid-template-columns:1fr;}
+  }
+
+  /* ---- Petit mobile : dernier resserrement pour les écrans étroits ---- */
+  @media (max-width:420px){
+    .main{padding:calc(1rem + env(safe-area-inset-top,0px)) .85rem 6.25rem;}
+    .nav-item{padding:.45rem .68rem;}
+    .kpi-grid{gap:.6rem;}
+    .kpi-card{padding:.9rem 1rem;min-height:118px;gap:1rem;}
+    .kpi-value{font-size:1.25rem;}
+    .kpi-card-label{font-size:.76rem;}
+    .page-title{font-size:1.22rem;}
+    .btn{padding:.6rem .9rem;font-size:.8rem;}
+    .cal-day{min-height:76px;}
+    .cal-day-num{font-size:.68rem;}
+    .cal-offer-chip{font-size:.56rem;padding:.12rem .3rem;}
+    .settings-row{flex-direction:column;align-items:flex-start;gap:.6rem;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important;transition-duration:0.001ms !important;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-wrap" class="toast-wrap"></div>
+
+<script>
+/* =========================================================
+   MELLO HUB — dashboard interne Mello Matelas
+   Architecture: fichier unique, vanilla JS, localStorage,
+   PWA installable — voir "Fiche technique Cockpit"
+   ========================================================= */
+
+/* ---------------- Storage helpers ---------------- */
+function loadJSON(key, fallback){
+  try{ const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; }
+  catch(e){ return fallback; }
+}
+function saveJSON(key, value){
+  try{ localStorage.setItem(key, JSON.stringify(value)); return true; }
+  catch(e){ toast("Impossible d'enregistrer les données.", "error"); return false; }
+}
+function uid(){ return Math.random().toString(36).slice(2,10); }
+
+const STORAGE = {
+  offres: 'mellohub_offres',
+  omnibus: 'mellohub_omnibus_products',
+  dayMarkers: 'mellohub_daymarkers',
+  view: 'mellohub_lastview',
+  unlocked: 'mellohub_unlocked'
+};
+
+/* ---------------- Version & changelog ---------------- */
+const APP_VERSION = '1.3.2';
+const CHANGELOG = [
+  { version:'1.3.2', date:'Août 2026', notes:"Suppression du mode sombre et des réglages associés (l'app reste en clair uniquement), traitement « verre liquide » appliqué à la navigation et aux sélecteurs à la place du gris plat, écran de mot de passe recentré sur des nuances de bleu subtiles uniquement." },
+  { version:'1.3.1', date:'Août 2026', notes:"Palette de couleurs alignée sur les Apple Human Interface Guidelines, écran de mot de passe entièrement repensé (verre liquide, animations subtiles, bouton cohérent), pop-up au survol des jours du calendrier, pastilles de repères agrandies avec icône, nouveau type de repère « Flash », animations de page qui ne se redéclenchent plus à chaque clic, ombres retirées des boutons principaux, sélecteur Apparence uniformisé." },
+  { version:'1.3.0', date:'Août 2026', notes:"Refonte visuelle iOS/macOS (moins de couleurs et d'ombres, sélecteurs unifiés), calendrier Offres repensé sans chevauchement (nom de l'offre affiché élégamment, repères cumulatifs), emojis libres sur les offres, verrouillage automatique après 5 min d'inactivité, page d'accueil et réglages simplifiés, Omnibus plus compact." },
+  { version:'1.2.1', date:'Août 2026', notes:"Uniformisation de tous les sélecteurs (Offres, Apparence, type de repère), fonds en blanc pur, calendrier plus compact et aux couleurs adoucies, icônes sur les offres, repères multi-jours colorés et personnalisables, numéro de version discret, page d'accueil épurée." },
+  { version:'1.2.0', date:'Août 2026', notes:"Refonte du calendrier Offres (pleine largeur, jours en couleur pleine, résumé des durées, notes et sous-offres, repères de journée), suivi Omnibus repensé par produit/variante avec historique des promotions, sélecteur de menu plus sobre, icônes et libellés clarifiés dans Réglages." },
+  { version:'1.1.0', date:'Août 2026', notes:"Design plus sobre et épuré, vue Calendrier par défaut dans Offres avec un affichage plus compact, page d'accueil simplifiée, réglages ancrés en bas de la barre latérale." },
+  { version:'1.0.1', date:'Août 2026', notes:"Ajout de l'écran de verrouillage commun et de la page Réglages." },
+  { version:'1.0.0', date:'Août 2026', notes:'Première version : Tableau de bord, Offres et Omnibus.' }
+];
+
+/* ---------------- Système de mise à jour ----------------
+   Compare la version locale à celle du index.html publié sur l'hébergement.
+   Fonctionne uniquement lorsque l'app est servie via http(s) (GitHub Pages, etc.) —
+   ouverte en fichier local (file://), la vérification n'est pas possible. */
+function compareVersions(a, b){
+  const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
+  for(let i=0;i<Math.max(pa.length,pb.length);i++){
+    const diff = (pa[i]||0) - (pb[i]||0);
+    if(diff !== 0) return diff > 0 ? 1 : -1;
+  }
+  return 0;
+}
+
+async function checkForUpdate(manual){
+  state.updateCheck = { status:'checking', version:null, checkedAt:null };
+  if(manual) renderView();
+  try{
+    const res = await fetch('./index.html?_=' + Date.now(), { cache:'no-store' });
+    if(!res.ok) throw new Error('http-' + res.status);
+    const html = await res.text();
+    const match = html.match(/APP_VERSION\s*=\s*['"]([\d.]+)['"]/);
+    if(!match) throw new Error('version-not-found');
+    const remoteVersion = match[1];
+    const cmp = compareVersions(remoteVersion, APP_VERSION);
+    state.updateCheck = { status: cmp > 0 ? 'available' : 'uptodate', version: remoteVersion, checkedAt: new Date() };
+    if(cmp > 0 && !manual) toast(`Nouvelle version disponible : v${remoteVersion} (voir Réglages)`, 'success');
+  }catch(e){
+    // Échec silencieux (app ouverte en local, hors-ligne...) — on revient simplement à l'état neutre.
+    state.updateCheck = { status:'idle', version:null, checkedAt:null };
+  }
+  if(state.currentView === 'reglages') renderView();
+}
+
+function applyUpdate(){
+  toast('Mise à jour en cours…', 'success');
+  setTimeout(() => { window.location.href = window.location.pathname + '?_=' + Date.now(); }, 400);
+}
+
+function updateStatusText(){
+  const uc = state.updateCheck;
+  if(uc.status === 'checking') return 'Recherche en cours…';
+  if(uc.status === 'available') return `Nouvelle version disponible : v${uc.version}`;
+  if(uc.status === 'uptodate') return `Vous utilisez déjà la dernière version.`;
+  return `Dernière vérification non effectuée.`;
+}
+
+/* ---------------- Accès protégé par mot de passe ----------------
+   Le mot de passe n'est jamais stocké en clair : seule son empreinte
+   SHA-256 est comparée à celle saisie par l'utilisateur. */
+const ACCESS_HASH = '91dcdf174d85b852069eff7890f683e400651df14f54b892b71a6f7a70e524f0';
+async function sha256Hex(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function isUnlocked(){ return sessionStorage.getItem(STORAGE.unlocked) === 'true' || localStorage.getItem(STORAGE.unlocked) === 'true'; }
+
+/* ---------------- Seed data ---------------- */
+function seedOffres(){
+  const today = new Date();
+  const d = (offset) => { const x = new Date(today); x.setDate(x.getDate()+offset); return x.toISOString().slice(0,10); };
+  return [
+    { id: uid(), title:"Soldes d'été", tag:"Soldes", start:d(-5), end:d(9), color:"#007AFF", note:"", subOffers:[{id:uid(), title:'Matelas -30%'}, {id:uid(), title:'Oreillers -20%'}] },
+    { id: uid(), title:"Mello Days", tag:"Temps fort", start:d(14), end:d(21), color:"#FF9500", note:"", subOffers:[] },
+    { id: uid(), title:"Au Lit Days", tag:"Temps fort", start:d(35), end:d(40), color:"#34C759", note:"", subOffers:[] },
+    { id: uid(), title:"Avant-première Black Friday", tag:"Avant-première", start:d(60), end:d(63), color:"#FF3B30", note:"", subOffers:[] }
+  ];
+}
+/* Migration silencieuse : les anciens repères (v1.2.0) avaient un champ `date`
+   unique ; on le convertit en startDate/endDate + couleur par défaut, sans perte. */
+function migrateDayMarkers(markers){
+  return markers.map(mk => ({
+    id: mk.id,
+    startDate: mk.startDate || mk.date,
+    endDate: mk.endDate || mk.date || mk.startDate,
+    icon: mk.icon || 'custom',
+    label: mk.label || '',
+    color: mk.color || '#5AC8FA'
+  }));
+}
+function seedDayMarkers(){
+  const today = new Date();
+  const d = (offset) => { const x = new Date(today); x.setDate(x.getDate()+offset); return x.toISOString().slice(0,10); };
+  return [
+    { id: uid(), startDate: d(2), endDate: d(2), icon:'newsletter', label:'Envoi newsletter', color:'#007AFF' },
+    { id: uid(), startDate: d(6), endDate: d(9), icon:'countdown', label:'Décompte fin des soldes', color:'#FF3B30' }
+  ];
+}
+/* Suivi Omnibus — un produit a plusieurs variantes ; chaque variante garde un
+   historique de ses changements de statut (normal / promo) pour connaître
+   depuis quand elle est dans son état actuel, et détecter les périodes de
+   prix normal trop courtes (<30 jours) avant une promotion. */
+function seedOmnibusProducts(){
+  const today = new Date();
+  const daysAgo = (n) => { const x = new Date(today); x.setDate(x.getDate()-n); return x.toISOString().slice(0,10); };
+  function variant(name, seedDays){
+    return { id: uid(), name, currentStatus:'normal', statusSince: daysAgo(seedDays), history:[{date:daysAgo(seedDays), status:'normal'}] };
+  }
+  function product(name){
+    return { id: uid(), name, variants:[ variant('Classique', 52), variant('Pure+', 52) ] };
+  }
+  return [ product('Matelas Relax'), product('Matelas Hybride'), product('Matelas Max') ];
+}
+
+let state = {
+  offres: loadJSON(STORAGE.offres, null) || seedOffres(),
+  omnibusProducts: loadJSON(STORAGE.omnibus, null) || seedOmnibusProducts(),
+  dayMarkers: migrateDayMarkers(loadJSON(STORAGE.dayMarkers, null) || seedDayMarkers()),
+  currentView: loadJSON(STORAGE.view, 'dashboard'),
+  calMonth: (() => { const n = new Date(); return { y:n.getFullYear(), m:n.getMonth() }; })(),
+  calSelected: null,
+  offresViewMode: 'calendar',
+  updateCheck: { status:'idle', version:null, checkedAt:null },
+  showChangelog: false,
+  omniExpanded: {}
+};
+if(!loadJSON(STORAGE.offres, null)) saveJSON(STORAGE.offres, state.offres);
+if(!loadJSON(STORAGE.omnibus, null)) saveJSON(STORAGE.omnibus, state.omnibusProducts);
+if(!loadJSON(STORAGE.dayMarkers, null)) saveJSON(STORAGE.dayMarkers, state.dayMarkers);
+
+function persistOffres(){ saveJSON(STORAGE.offres, state.offres); }
+function persistOmnibus(){ saveJSON(STORAGE.omnibus, state.omnibusProducts); }
+function persistDayMarkers(){ saveJSON(STORAGE.dayMarkers, state.dayMarkers); }
+
+/* ---------------- Icons (inline SVG, stroke-based) ---------------- */
+const ICONS = {
+  dashboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>',
+  offres: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18"/><path d="M8 2.5v4M16 2.5v4"/><circle cx="8.5" cy="14" r="1"/><circle cx="12" cy="14" r="1"/><circle cx="15.5" cy="14" r="1"/></svg>',
+  omnibus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"/><path d="M14 6h6v6"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+  auto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2.2"/><path d="M8.5 20h7M12 16v4"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+  chevronL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  chevronR: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+  flash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  alertTri: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  empty: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18"/><path d="m9 14 2 2 4-4"/></svg>',
+  table: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l18 12"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5"/></svg>',
+  unlock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16v9H4z"/><path d="M8 12V7a4 4 0 0 1 7.2-2.4"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>',
+  sparkle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></svg>',
+  chevronDown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  arrowUpRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"/></svg>',
+  note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:inline-block;vertical-align:-2px;"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="m4 7 8 6 8-6"/></svg>',
+  timer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M10 2h4M12 2v3"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 2.9 6.6 7.1.7-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7-5.4-4.7 7.1-.7Z"/></svg>',
+  tag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.6 2.5H5a2.5 2.5 0 0 0-2.5 2.5v7.6c0 .66.26 1.3.73 1.77l9.3 9.3a2.5 2.5 0 0 0 3.54 0l6.36-6.36a2.5 2.5 0 0 0 0-3.54l-9.3-9.3a2.5 2.5 0 0 0-1.77-.73Z"/><circle cx="8" cy="8" r="1.5"/></svg>',
+  gift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M3 13h18M12 9v12"/><path d="M12 9C9.5 9 7.5 6 8.5 4.2 9.5 2.6 12 4 12 6.5c0-2.5 2.5-3.9 3.5-2.3C16.5 6 14.5 9 12 9Z"/></svg>',
+  fire: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s-4.5 4.5-4.5 9a4.5 4.5 0 1 0 9 0c0-1.2-.5-2.1-1-2.8.2 1.5-.6 2.3-1.2 1.8-.7-.6-.3-1.8-1-3C12.8 5.5 12 4 12 2Z"/><path d="M9 15.5A3 3 0 0 0 12 18a3 3 0 0 0 3-2.5"/></svg>'
+};
+
+const NAV_ITEMS = [
+  { id:'dashboard', label:'Tableau de bord', short:'Accueil', icon: ICONS.dashboard },
+  { id:'offres', label:'Offres', short:'Offres', icon: ICONS.offres },
+  { id:'omnibus', label:'Omnibus', short:'Omnibus', icon: ICONS.omnibus }
+];
+const SETTINGS_ITEM = { id:'reglages', label:'Réglages', short:'Réglages', icon: ICONS.gear };
+
+/* ---------------- Utils ---------------- */
+const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const DOW_FR = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+function parseDate(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function fmtDate(s){ const d = parseDate(s); return d.getDate() + ' ' + MONTHS_FR[d.getMonth()].slice(0,3); }
+function fmtDateLong(s){ const d = parseDate(s); return d.getDate() + ' ' + MONTHS_FR[d.getMonth()] + ' ' + d.getFullYear(); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.round((parseDate(b) - parseDate(a)) / 86400000); }
+function offerStatus(o){
+  const t = todayStr();
+  if(o.end < t) return 'passee';
+  if(o.start <= t && o.end >= t) return 'active';
+  return 'avenir';
+}
+const STATUS_META = {
+  avenir: { label:'À venir', color:'var(--accent)', soft:'var(--accent-soft)' },
+  active: { label:'En cours', color:'var(--positive)', soft:'var(--positive-soft)' },
+  passee: { label:'Terminée', color:'var(--muted)', soft:'rgba(91,107,130,0.12)' }
+};
+function escapeHtml(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function capitalize(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+/* ---------------- Toasts ---------------- */
+function toast(msg, kind){
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' ' + kind : '');
+  el.innerHTML = (kind==='success'?ICONS.check:kind==='error'?ICONS.alertTri:'') + '<span>' + escapeHtml(msg) + '</span>';
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateY(8px)'; el.style.transition='all .25s ease'; setTimeout(()=>el.remove(), 250); }, 2200);
+}
+
+/* ================= LOCK SCREEN ================= */
+function renderLock(){
+  const app = document.getElementById('app');
+  app.classList.remove('shell');
+  app.innerHTML = `
+    <div class="lock-screen">
+      <div class="lock-blob b1"></div><div class="lock-blob b2"></div><div class="lock-blob b3"></div>
+      <div class="lock-card">
+        <img class="lock-badge" src="./icon-192.png" alt="Mello Hub">
+        <div class="lock-title">Mello Hub</div>
+        <div class="lock-sub">Accès réservé à l'équipe Mello</div>
+        <div class="lock-field">
+          <input type="password" id="lock-input" placeholder="Mot de passe" autocomplete="off" autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="lock-error" id="lock-error"></div>
+        <label class="lock-remember" style="display:flex;align-items:center;gap:.45rem;justify-content:center;margin-bottom:1.1rem;font-size:.75rem;">
+          <input type="checkbox" id="lock-remember" checked>
+          Rester connecté sur cet appareil
+        </label>
+        <button class="btn btn-primary btn-block" id="lock-submit">${ICONS.unlock} Déverrouiller</button>
+      </div>
+    </div>
+  `;
+  const input = document.getElementById('lock-input');
+  const errorEl = document.getElementById('lock-error');
+  const card = document.querySelector('.lock-card');
+  input.focus();
+
+  async function attempt(){
+    const value = input.value;
+    if(!value) return;
+    const hash = await sha256Hex(value);
+    if(hash === ACCESS_HASH){
+      const remember = document.getElementById('lock-remember').checked;
+      if(remember) localStorage.setItem(STORAGE.unlocked, 'true');
+      else sessionStorage.setItem(STORAGE.unlocked, 'true');
+      renderShell();
+      resetInactivityTimer();
+    }else{
+      errorEl.textContent = 'Mot de passe incorrect.';
+      card.classList.remove('lock-shake'); void card.offsetWidth; card.classList.add('lock-shake');
+      input.value=''; input.focus();
+    }
+  }
+  document.getElementById('lock-submit').addEventListener('click', attempt);
+  input.addEventListener('keydown', (e) => { if(e.key === 'Enter') attempt(); });
+}
+
+function lockApp(){
+  localStorage.removeItem(STORAGE.unlocked);
+  sessionStorage.removeItem(STORAGE.unlocked);
+  clearTimeout(inactivityTimer);
+  renderLock();
+}
+
+/* ---------------- Verrouillage automatique après inactivité ---------------- */
+const INACTIVITY_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
+let inactivityTimer = null;
+function resetInactivityTimer(){
+  if(!isUnlocked()) return;
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(() => {
+    lockApp();
+  }, INACTIVITY_LIMIT_MS);
+}
+['click','keydown','mousemove','touchstart','scroll'].forEach(evt => {
+  document.addEventListener(evt, resetInactivityTimer, { passive:true });
+});
+
+/* ================= RENDER: SHELL ================= */
+function renderShell(){
+  const app = document.getElementById('app');
+  app.classList.add('shell');
+  app.innerHTML = `
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-badge" src="./icon-192.png" alt="Mello Hub">
+        <div>
+          <div class="brand-name">Mello Hub</div>
+          <div class="brand-sub">Outil interne</div>
+        </div>
+      </div>
+      <div class="nav-shell">
+        <nav class="nav" id="nav">
+          <div class="nav-pill" id="nav-pill"></div>
+          ${NAV_ITEMS.map(it => `
+            <div class="nav-item${state.currentView===it.id?' active':''}" data-action="go-view" data-view="${it.id}">
+              ${it.icon}
+              <span class="nav-label-full">${it.label}</span>
+              <span class="nav-label-compact">${it.short}</span>
+            </div>`).join('')}
+        </nav>
+        <div class="nav-secondary" id="nav-secondary">
+          <div class="nav-item${state.currentView===SETTINGS_ITEM.id?' active':''}" data-action="go-view" data-view="${SETTINGS_ITEM.id}">
+            ${SETTINGS_ITEM.icon}
+            <span class="nav-label-full">${SETTINGS_ITEM.label}</span>
+            <span class="nav-label-compact">${SETTINGS_ITEM.short}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <main class="main" id="main"></main>
+  `;
+  renderView();
+  attachGlobalHandlers();
+  requestAnimationFrame(() => { positionPill(true); });
+  if(!state._autoUpdateChecked){
+    state._autoUpdateChecked = true;
+    checkForUpdate(false);
+  }
+}
+
+function positionPill(skipTransition){
+  const pill = document.getElementById('nav-pill');
+  const nav = document.getElementById('nav');
+  const active = nav.querySelector('.nav-item.active');
+  if(!pill || !nav) return;
+  if(!active){ pill.style.opacity = '0'; return; }
+  pill.style.opacity = '1';
+  if(skipTransition) pill.style.transition = 'none';
+  const itemRect = active.getBoundingClientRect();
+  const parentRect = nav.getBoundingClientRect();
+  pill.style.width = itemRect.width + 'px';
+  pill.style.height = itemRect.height + 'px';
+  pill.style.transform = `translate(${itemRect.left - parentRect.left}px, ${itemRect.top - parentRect.top}px)`;
+  if(skipTransition){
+    void pill.offsetWidth;
+    pill.style.transition = 'transform .25s cubic-bezier(.4,0,.2,1), width .2s ease, height .2s ease';
+  }
+}
+
+/* ================= RENDER: VIEW ROUTER ================= */
+function renderView(animate){
+  const main = document.getElementById('main');
+  if(state.currentView === 'dashboard') main.innerHTML = renderDashboard();
+  else if(state.currentView === 'offres') main.innerHTML = renderOffres();
+  else if(state.currentView === 'omnibus') main.innerHTML = renderOmnibus();
+  else if(state.currentView === 'reglages') main.innerHTML = renderReglages();
+  if(animate){
+    main.classList.remove('view-fade'); void main.offsetWidth; main.classList.add('view-fade');
+  }
+}
+
+/* ================= DASHBOARD ================= */
+function renderDashboard(){
+  const upcoming = state.offres.filter(o => offerStatus(o) !== 'passee').sort((a,b) => a.start.localeCompare(b.start));
+  const active = state.offres.filter(o => offerStatus(o) === 'active');
+
+  return `
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Mello Hub</div>
+        <h1 class="page-title">${capitalize(new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }))}</h1>
+      </div>
+    </div>
+
+    <div class="grid kpi-grid" style="grid-template-columns:repeat(2,1fr);">
+      ${kpiCard(ICONS.flash, 'positive', 'Offres en cours', active.length)}
+      ${kpiCard(ICONS.calendar, 'accent', 'Offres à venir', upcoming.filter(o=>offerStatus(o)==='avenir').length)}
+    </div>
+
+    <div class="card">
+      <div class="section-title">Prochaines offres <span class="count">${upcoming.length} au total</span></div>
+      ${upcoming.length === 0 ? emptyState('Aucune offre planifiée pour le moment.') :
+        upcoming.slice(0,5).map(o => {
+          const st = offerStatus(o); const meta = STATUS_META[st];
+          return `<div class="offer-mini">
+            <span class="offer-dot" style="background:${o.color}"></span>
+            <div>
+              <div class="offer-mini-title">${o.icon ? `<span style="margin-right:.15rem;">${o.icon}</span>` : ''}${escapeHtml(o.title)}${o.note ? ` <span title="Cette offre a une note">${ICONS.note}</span>` : ''}${o.subOffers && o.subOffers.length ? ` <span class="tag-chip">${o.subOffers.length} sous-offre${o.subOffers.length>1?'s':''}</span>` : ''}</div>
+              <div class="offer-mini-sub">${fmtDate(o.start)} → ${fmtDate(o.end)}</div>
+            </div>
+            <span class="offer-mini-badge" style="color:${meta.color};background:${meta.soft}">${meta.label}</span>
+          </div>`;
+        }).join('')}
+    </div>
+  `;
+}
+
+function kpiCard(icon, colorKey, label, value, sub){
+  return `<div class="kpi-card">
+    <div class="kpi-top">
+      <div class="kpi-icon-badge" style="background:var(--${colorKey}-soft);color:var(--${colorKey})">${icon}</div>
+    </div>
+    <div class="kpi-value-row">
+      <span class="kpi-value">${value}</span>
+      <div>
+        <div class="kpi-card-label">${escapeHtml(label)}</div>
+        ${sub ? `<div class="kpi-value-sub">${escapeHtml(sub)}</div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function emptyState(msg){
+  return `<div class="empty-state">${ICONS.empty}<div>${escapeHtml(msg)}</div></div>`;
+}
+
+/* ================= OFFRES ================= */
+function renderOffres(){
+  const sorted = [...state.offres].sort((a,b) => a.start.localeCompare(b.start));
+  return `
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Commercial</div>
+        <h1 class="page-title">Offres</h1>
+      </div>
+      <div class="topbar-actions">
+        <div class="segmented">
+          <button class="${state.offresViewMode==='calendar'?'active':''}" data-action="offres-view" data-mode="calendar">${ICONS.calendar} Calendrier</button>
+          <button class="${state.offresViewMode==='table'?'active':''}" data-action="offres-view" data-mode="table">${ICONS.table} Tableau</button>
+        </div>
+        <button class="btn btn-primary" data-action="open-offer-modal">${ICONS.plus} Nouvelle offre</button>
+      </div>
+    </div>
+    ${state.offresViewMode === 'table' ? renderOffresTable(sorted) : `${renderOffresCalendar()}${renderOffresDurationSummary(sorted)}`}
+  `;
+}
+
+function renderOffresTable(sorted){
+  if(sorted.length === 0){
+    return `<div class="card">${emptyState("Aucune offre pour le moment — cliquez sur « Nouvelle offre » pour commencer.")}</div>`;
+  }
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Offre</th><th>Tag</th><th>Début</th><th>Fin</th><th>Statut</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${sorted.map(o => {
+            const st = offerStatus(o); const meta = STATUS_META[st];
+            return `<tr>
+              <td>
+                <span class="offer-dot" style="background:${o.color};width:9px;height:9px;box-shadow:none;display:inline-block;margin-right:.5rem"></span>
+                ${o.icon ? `<span style="margin-right:.3rem;">${o.icon}</span>` : ''}
+                <span class="cell-title">${escapeHtml(o.title)}</span>
+                ${o.note ? ` <span title="${escapeHtml(o.note)}">${ICONS.note}</span>` : ''}
+                ${o.subOffers && o.subOffers.length ? ` <span class="tag-chip">${o.subOffers.length} sous-offre${o.subOffers.length>1?'s':''}</span>` : ''}
+              </td>
+              <td><span class="tag-chip">${escapeHtml(o.tag||'—')}</span></td>
+              <td>${fmtDate(o.start)}</td>
+              <td>${fmtDate(o.end)}</td>
+              <td><span class="badge" style="color:${meta.color};background:${meta.soft}">${meta.label}</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn" data-action="edit-offer" data-id="${o.id}" title="Modifier">${ICONS.edit}</button>
+                  <button class="icon-btn danger" data-action="delete-offer" data-id="${o.id}" title="Supprimer">${ICONS.trash}</button>
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+const MARKER_TYPES = [
+  { id:'newsletter', label:'Newsletter', icon: ICONS.mail },
+  { id:'countdown', label:'Décompte', icon: ICONS.timer },
+  { id:'flash', label:'Flash', icon: ICONS.flash },
+  { id:'custom', label:'Autre', icon: ICONS.star }
+];
+
+function renderOffresCalendar(){
+  const { y, m } = state.calMonth;
+  const first = new Date(y, m, 1);
+  const startOffset = (first.getDay() + 6) % 7; // lundi = 0
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const daysInPrevMonth = new Date(y, m, 0).getDate();
+  const cells = [];
+  for(let i=0;i<startOffset;i++) cells.push({ day: daysInPrevMonth - startOffset + i + 1, outside:true });
+  for(let d=1; d<=daysInMonth; d++) cells.push({ day:d, outside:false });
+  while(cells.length % 7 !== 0) cells.push({ day: cells.length, outside:true });
+
+  const today = todayStr();
+  function dateStrOf(cell){
+    if(cell.outside) return null;
+    const dd = String(cell.day).padStart(2,'0'); const mm = String(m+1).padStart(2,'0');
+    return `${y}-${mm}-${dd}`;
+  }
+  const offersOnDay = (ds) => state.offres.filter(o => o.start <= ds && o.end >= ds);
+  const markersOnDay = (ds) => state.dayMarkers.filter(mk => mk.startDate <= ds && (mk.endDate || mk.startDate) >= ds);
+
+  const selectedDay = state.calSelected;
+  const selectedOffers = selectedDay ? offersOnDay(selectedDay) : [];
+  const selectedMarkers = selectedDay ? markersOnDay(selectedDay) : [];
+
+  return `
+    <div class="card cal-card">
+      <div class="cal-head">
+        <h3>${MONTHS_FR[m]} ${y}</h3>
+        <div class="cal-nav">
+          <button class="icon-btn" data-action="cal-prev">${ICONS.chevronL}</button>
+          <button class="btn btn-ghost" data-action="cal-today" style="padding:.4rem .75rem;font-size:.75rem;">Aujourd'hui</button>
+          <button class="icon-btn" data-action="cal-next">${ICONS.chevronR}</button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        ${DOW_FR.map(d => `<div class="cal-dow">${d}</div>`).join('')}
+        ${cells.map(cell => {
+          if(cell.outside) return `<div class="cal-day outside"><div class="cal-day-top"><span class="cal-day-num">${cell.day}</span></div></div>`;
+          const ds = dateStrOf(cell);
+          const dayOffers = offersOnDay(ds);
+          const dayMarkers = markersOnDay(ds);
+          const isToday = ds === today;
+          const isSelected = ds === selectedDay;
+          const visibleOffers = dayOffers.slice(0, 2);
+          const extraOffers = dayOffers.length - visibleOffers.length;
+          const visibleMarkers = dayMarkers.slice(0, 5);
+          const extraMarkers = dayMarkers.length - visibleMarkers.length;
+          return `<div class="cal-day${isToday?' today':''}${isSelected?' selected':''}" data-action="cal-select" data-date="${ds}">
+            <div class="cal-day-top"><span class="cal-day-num">${cell.day}</span></div>
+            <div class="cal-day-offers">
+              ${visibleOffers.map(o => `<div class="cal-offer-chip" style="background:${softenColor(o.color, 0.7)};color:${o.color}">${o.icon ? escapeHtml(o.icon)+' ' : ''}${escapeHtml(o.title)}</div>`).join('')}
+              ${extraOffers > 0 ? `<div class="cal-offer-more">+${extraOffers} autre${extraOffers>1?'s':''}</div>` : ''}
+            </div>
+            ${dayMarkers.length ? `<div class="cal-day-markers">
+              ${visibleMarkers.map(mk => { const type = MARKER_TYPES.find(t => t.id === mk.icon) || MARKER_TYPES[3]; return `<span class="cal-marker-dot" style="background:${mk.color || 'var(--accent)'}" title="${escapeHtml(mk.label || type.label)}">${type.icon}</span>`; }).join('')}
+              ${extraMarkers > 0 ? `<span class="cal-marker-more">+${extraMarkers}</span>` : ''}
+            </div>` : ''}
+            ${(dayOffers.length || dayMarkers.length) ? `
+              <div class="cal-day-popover">
+                <div class="cal-popover-date">${cell.day} ${MONTHS_FR[m]}</div>
+                ${dayOffers.map(o => `<div class="cal-popover-row"><span class="cal-popover-dot" style="background:${o.color}"></span>${o.icon ? escapeHtml(o.icon)+' ' : ''}${escapeHtml(o.title)}</div>`).join('')}
+                ${dayMarkers.map(mk => { const type = MARKER_TYPES.find(t => t.id === mk.icon) || MARKER_TYPES[3]; return `<div class="cal-popover-row muted"><span class="cal-popover-dot" style="background:${mk.color || 'var(--accent)'}"></span>${escapeHtml(mk.label || type.label)}</div>`; }).join('')}
+              </div>
+            ` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+      ${selectedDay ? renderDayDetail(selectedDay, selectedOffers, selectedMarkers) : ''}
+    </div>
+  `;
+}
+
+function renderDayDetail(date, offers, markers){
+  return `
+    <div class="cal-day-list">
+      <div class="section-title">${fmtDateLong(date)}</div>
+      ${offers.length === 0 ? emptyState('Aucune offre ce jour-là.') : offers.map(o => {
+        const st = offerStatus(o); const meta = STATUS_META[st];
+        return `<div class="offer-mini">
+          <span class="offer-dot" style="background:${o.color}"></span>
+          <div>
+            <div class="offer-mini-title">${o.icon ? `<span style="margin-right:.15rem;">${escapeHtml(o.icon)}</span>` : ''}${escapeHtml(o.title)}${o.note ? ` <span title="${escapeHtml(o.note)}">${ICONS.note}</span>` : ''}</div>
+            <div class="offer-mini-sub">${fmtDate(o.start)} → ${fmtDate(o.end)}</div>
+            ${o.subOffers && o.subOffers.length ? `<div class="sub-offer-chips">${o.subOffers.map(s => `<span class="tag-chip">${escapeHtml(s.title)}</span>`).join('')}</div>` : ''}
+          </div>
+          <button class="icon-btn" data-action="edit-offer" data-id="${o.id}" title="Modifier">${ICONS.edit}</button>
+        </div>`;
+      }).join('')}
+
+      <div class="day-markers-section">
+        <div class="day-markers-head">
+          <span>Repères du jour</span>
+          <button class="btn btn-ghost btn-sm" data-action="open-marker-modal" data-date="${date}">${ICONS.plus} Ajouter</button>
+        </div>
+        ${markers.length === 0 ? `<div class="settings-sub" style="padding:.2rem 0;">Aucun repère pour ce jour.</div>` : markers.map(mk => {
+          const type = MARKER_TYPES.find(t => t.id === mk.icon) || MARKER_TYPES[2];
+          const isRange = mk.endDate && mk.endDate !== mk.startDate;
+          return `<div class="marker-chip">
+            <span class="marker-chip-icon" style="background:${softenColor(mk.color || '#5AC8FA', 0.75)};color:${mk.color || 'var(--accent)'}">${type.icon}</span>
+            <span>${escapeHtml(mk.label || type.label)}${isRange ? ` <span class="settings-sub" style="margin:0;">(${fmtDate(mk.startDate)} → ${fmtDate(mk.endDate)})</span>` : ''}</span>
+            <button class="icon-btn danger" data-action="delete-marker" data-id="${mk.id}" title="Supprimer">${ICONS.trash}</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderOffresDurationSummary(sorted){
+  if(sorted.length === 0) return '';
+  return `
+    <div class="card" style="margin-top:1rem;">
+      <div class="section-title">Durée des offres <span class="count">${sorted.length} au total</span></div>
+      ${sorted.map(o => {
+        const duration = daysBetween(o.start, o.end) + 1;
+        const st = offerStatus(o); const meta = STATUS_META[st];
+        return `<div class="duration-row">
+          <span class="offer-dot" style="background:${o.color};width:11px;height:11px;box-shadow:none;flex-shrink:0;"></span>
+          ${o.icon ? `<span>${escapeHtml(o.icon)}</span>` : ''}
+          <span class="duration-title">${escapeHtml(o.title)}</span>
+          <span class="duration-value">durée ${duration} jour${duration>1?'s':''}</span>
+          <span class="badge" style="color:${meta.color};background:${meta.soft}">${meta.label}</span>
+          <button class="icon-btn" data-action="edit-offer" data-id="${o.id}" title="Modifier cette offre">${ICONS.edit}</button>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ---- Repères de journée (newsletter, décompte, autre) ---- */
+function openMarkerModal(date){
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="modal-backdrop" id="marker-backdrop">
+      <div class="modal">
+        <h3 class="modal-title">Ajouter un repère</h3>
+        <div class="field">
+          <label>Type</label>
+          <div class="marker-type-row" id="marker-type-row">
+            ${MARKER_TYPES.map((t,i) => `<button type="button" class="marker-type-btn${i===0?' selected':''}" data-type="${t.id}">${t.icon}<span>${t.label}</span></button>`).join('')}
+          </div>
+        </div>
+        <div class="field">
+          <label>Libellé</label>
+          <input type="text" id="f-marker-label" placeholder="Ex. Envoi newsletter, Décompte Black Friday...">
+        </div>
+        <div class="field field-row">
+          <div>
+            <label>Du</label>
+            <input type="date" id="f-marker-start" value="${date}">
+          </div>
+          <div>
+            <label>Au (optionnel)</label>
+            <input type="date" id="f-marker-end" value="${date}">
+          </div>
+        </div>
+        <div class="field">
+          <label>Couleur</label>
+          <div class="swatch-row" id="f-marker-swatches">
+            ${OFFER_COLORS.map((c,i) => `<div class="swatch${i===0?' selected':''}" data-color="${c}" style="background:${c}"></div>`).join('')}
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" data-action="close-modal">Annuler</button>
+          <button class="btn btn-primary" data-action="save-marker" data-date="${date}">${ICONS.check} Ajouter</button>
+        </div>
+      </div>
+    </div>
+  `;
+  requestAnimationFrame(() => document.getElementById('marker-backdrop').classList.add('open'));
+  let selectedType = MARKER_TYPES[0].id;
+  let selectedColor = OFFER_COLORS[0];
+  document.getElementById('marker-type-row').addEventListener('click', (e) => {
+    const btn = e.target.closest('.marker-type-btn'); if(!btn) return;
+    document.querySelectorAll('.marker-type-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected'); selectedType = btn.dataset.type;
+  });
+  document.getElementById('f-marker-swatches').addEventListener('click', (e) => {
+    const sw = e.target.closest('.swatch'); if(!sw) return;
+    document.querySelectorAll('#f-marker-swatches .swatch').forEach(s => s.classList.remove('selected'));
+    sw.classList.add('selected'); selectedColor = sw.dataset.color;
+  });
+  root._getMarkerType = () => selectedType;
+  root._getMarkerColor = () => selectedColor;
+}
+
+function saveMarkerFromModal(){
+  const label = document.getElementById('f-marker-label').value.trim();
+  const startDate = document.getElementById('f-marker-start').value;
+  let endDate = document.getElementById('f-marker-end').value || startDate;
+  if(endDate < startDate) endDate = startDate;
+  const modalRoot = document.getElementById('modal-root');
+  const type = modalRoot._getMarkerType ? modalRoot._getMarkerType() : MARKER_TYPES[0].id;
+  const color = modalRoot._getMarkerColor ? modalRoot._getMarkerColor() : OFFER_COLORS[0];
+  if(!startDate){ toast('Merci de renseigner une date.', 'error'); return; }
+  state.dayMarkers.push({ id: uid(), startDate, endDate, icon: type, label, color });
+  persistDayMarkers();
+  closeModal();
+  renderView();
+  toast('Repère ajouté.', 'success');
+}
+
+function deleteDayMarker(id){
+  state.dayMarkers = state.dayMarkers.filter(mk => mk.id !== id);
+  persistDayMarkers();
+  renderView();
+  toast('Repère supprimé.');
+}
+
+/* ---- Offer modal ---- */
+/* Adoucit une couleur hex en la mélangeant avec du blanc — utilisé pour les
+   remplissages de jour du calendrier, afin de garder les teintes vives comme
+   identifiants (puces, pastilles) mais des fonds de case beaucoup plus doux. */
+function softenColor(hex, amount = 0.72){
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2), 16);
+  const g = parseInt(h.substring(2,4), 16);
+  const b = parseInt(h.substring(4,6), 16);
+  const mix = (c) => Math.round(c + (255 - c) * amount);
+  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+}
+
+const EMOJI_SUGGESTIONS = ['🔥','🎉','⭐','🎁','⏰','💥','🛏️','🧵','☀️','❄️','💙'];
+
+const OFFER_COLORS = ['#007AFF','#34C759','#FF9500','#FF3B30','#5AC8FA','#AF52DE'];
+
+function openOfferModal(id){
+  const editing = id ? state.offres.find(o => o.id === id) : null;
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="modal-backdrop" id="offer-backdrop">
+      <div class="modal">
+        <h3 class="modal-title">${editing ? 'Modifier l’offre' : 'Nouvelle offre'}</h3>
+        <div class="field">
+          <label>Titre de l'offre</label>
+          <input type="text" id="f-title" value="${editing ? escapeHtml(editing.title) : ''}" placeholder="Ex. Mello Days">
+        </div>
+        <div class="field">
+          <label>Tag</label>
+          <input type="text" id="f-tag" value="${editing ? escapeHtml(editing.tag||'') : ''}" placeholder="Ex. Temps fort, Soldes...">
+        </div>
+        <div class="field field-row">
+          <div>
+            <label>Début</label>
+            <input type="date" id="f-start" value="${editing ? editing.start : todayStr()}">
+          </div>
+          <div>
+            <label>Fin</label>
+            <input type="date" id="f-end" value="${editing ? editing.end : todayStr()}">
+          </div>
+        </div>
+        <div class="field">
+          <label>Couleur</label>
+          <div class="swatch-row" id="f-swatches">
+            ${OFFER_COLORS.map(c => `<div class="swatch${(editing?editing.color:OFFER_COLORS[0])===c?' selected':''}" data-color="${c}" style="background:${c}"></div>`).join('')}
+          </div>
+        </div>
+        <div class="field">
+          <label>Emoji (optionnel)</label>
+          <div class="emoji-field-row">
+            <input type="text" id="f-icon" value="${editing && editing.icon ? escapeHtml(editing.icon) : ''}" placeholder="🔥" maxlength="4">
+            <div class="emoji-suggestions">
+              ${EMOJI_SUGGESTIONS.map(e => `<button type="button" class="emoji-suggestion-btn" data-emoji="${e}">${e}</button>`).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Note</label>
+          <textarea id="f-note" placeholder="Note interne, visible uniquement dans l'app">${editing ? escapeHtml(editing.note||'') : ''}</textarea>
+        </div>
+        <div class="field">
+          <label>Sous-offres</label>
+          <div id="f-suboffers-list" class="suboffer-list"></div>
+          <div class="suboffer-add-row">
+            <input type="text" id="f-suboffer-input" placeholder="Ex. Matelas -30%">
+            <button type="button" class="btn btn-ghost btn-sm" id="f-suboffer-add-btn">${ICONS.plus} Ajouter</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          ${editing ? `<button class="btn btn-ghost" style="margin-right:auto;color:var(--negative)" data-action="delete-offer" data-id="${editing.id}">Supprimer</button>` : ''}
+          <button class="btn btn-ghost" data-action="close-modal">Annuler</button>
+          <button class="btn btn-primary" data-action="save-offer" data-id="${editing ? editing.id : ''}">${ICONS.check} Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  `;
+  requestAnimationFrame(() => document.getElementById('offer-backdrop').classList.add('open'));
+  let selectedColor = editing ? editing.color : OFFER_COLORS[0];
+  document.getElementById('f-swatches').addEventListener('click', (e) => {
+    const sw = e.target.closest('.swatch'); if(!sw) return;
+    document.querySelectorAll('#f-swatches .swatch').forEach(s => s.classList.remove('selected'));
+    sw.classList.add('selected'); selectedColor = sw.dataset.color;
+  });
+  root._getColor = () => selectedColor;
+
+  document.querySelectorAll('.emoji-suggestion-btn').forEach(btn => {
+    btn.addEventListener('click', () => { document.getElementById('f-icon').value = btn.dataset.emoji; });
+  });
+  root._getIcon = () => document.getElementById('f-icon').value.trim();
+
+  let subOffers = editing && editing.subOffers ? editing.subOffers.map(s => ({...s})) : [];
+  function renderSubOffersList(){
+    const list = document.getElementById('f-suboffers-list');
+    list.innerHTML = subOffers.length === 0 ? `<div class="settings-sub">Aucune sous-offre.</div>` : subOffers.map((s,i) => `
+      <div class="suboffer-chip">
+        <span>${escapeHtml(s.title)}</span>
+        <button type="button" class="icon-btn danger suboffer-remove" data-index="${i}" title="Supprimer">${ICONS.trash}</button>
+      </div>`).join('');
+    list.querySelectorAll('.suboffer-remove').forEach(btn => {
+      btn.addEventListener('click', () => { subOffers.splice(Number(btn.dataset.index), 1); renderSubOffersList(); });
+    });
+  }
+  renderSubOffersList();
+  document.getElementById('f-suboffer-add-btn').addEventListener('click', () => {
+    const input = document.getElementById('f-suboffer-input');
+    const val = input.value.trim();
+    if(!val) return;
+    subOffers.push({ id: uid(), title: val });
+    input.value = '';
+    renderSubOffersList();
+  });
+  root._getSubOffers = () => subOffers;
+}
+
+function closeModal(){
+  const backdrop = document.querySelector('.modal-backdrop');
+  if(!backdrop) return;
+  backdrop.classList.remove('open');
+  setTimeout(() => { document.getElementById('modal-root').innerHTML=''; }, 200);
+}
+
+function saveOfferFromModal(id){
+  const title = document.getElementById('f-title').value.trim();
+  const tag = document.getElementById('f-tag').value.trim();
+  const start = document.getElementById('f-start').value;
+  const end = document.getElementById('f-end').value;
+  const note = document.getElementById('f-note').value.trim();
+  const modalRoot = document.getElementById('modal-root');
+  const color = modalRoot._getColor ? modalRoot._getColor() : OFFER_COLORS[0];
+  const icon = modalRoot._getIcon ? modalRoot._getIcon() : '';
+  const subOffers = modalRoot._getSubOffers ? modalRoot._getSubOffers() : [];
+  if(!title){ toast('Merci de renseigner un titre.', 'error'); return; }
+  if(!start || !end || end < start){ toast('Les dates ne sont pas valides.', 'error'); return; }
+  if(id){
+    const o = state.offres.find(x => x.id === id);
+    Object.assign(o, { title, tag, start, end, color, note, icon, subOffers });
+    toast('Offre mise à jour.', 'success');
+  }else{
+    state.offres.push({ id: uid(), title, tag, start, end, color, note, icon, subOffers });
+    toast('Offre créée.', 'success');
+  }
+  persistOffres();
+  closeModal();
+  renderView();
+}
+
+function deleteOffer(id){
+  state.offres = state.offres.filter(o => o.id !== id);
+  persistOffres();
+  closeModal();
+  renderView();
+  toast('Offre supprimée.');
+}
+
+/* ================= OMNIBUS ================= */
+function renderOmnibus(){
+  const allVariants = [];
+  state.omnibusProducts.forEach(p => p.variants.forEach(v => allVariants.push(v)));
+  const totalVariants = allVariants.length;
+  const promoCount = allVariants.filter(v => v.currentStatus === 'promo').length;
+  const normalCount = totalVariants - promoCount;
+  const warnCount = allVariants.filter(v => variantComplianceWarning(v) !== null).length;
+
+  return `
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Conformité</div>
+        <h1 class="page-title">Omnibus</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" data-action="add-product">${ICONS.plus} Produit</button>
+      </div>
+    </div>
+
+    <div class="grid kpi-grid" style="margin-bottom:1.4rem;">
+      ${kpiCard(ICONS.omnibus, 'accent', 'Variantes suivies', totalVariants, `${state.omnibusProducts.length} produit${state.omnibusProducts.length>1?'s':''}`)}
+      ${kpiCard(ICONS.check, 'positive', 'Prix normal actuellement', normalCount)}
+      ${kpiCard(ICONS.flash, 'alert', 'En promotion', promoCount)}
+      ${kpiCard(warnCount>0 ? ICONS.alertTri : ICONS.check, warnCount>0 ? 'negative' : 'positive', 'Alertes conformité', warnCount, warnCount>0 ? 'Prix normal < 30 jours' : 'Aucune alerte')}
+    </div>
+
+    ${state.omnibusProducts.length === 0
+      ? `<div class="card">${emptyState("Aucun produit suivi pour le moment — cliquez sur « Produit » pour commencer.")}</div>`
+      : state.omnibusProducts.map(p => renderOmniProductCard(p)).join('')}
+  `;
+}
+
+function renderOmniProductCard(p){
+  return `
+    <div class="card" style="margin-bottom:.75rem;padding:.9rem 1.1rem;">
+      <div class="section-title" style="margin-bottom:.5rem;">
+        <input class="product-name-input" value="${escapeHtml(p.name)}" data-action="rename-product" data-product="${p.id}">
+        <button class="icon-btn danger" data-action="delete-product" data-product="${p.id}" title="Supprimer le produit">${ICONS.trash}</button>
+      </div>
+      ${p.variants.map(v => renderVariantRow(p, v)).join('')}
+      <button class="add-col-btn" style="margin-top:.6rem;width:100%;padding:.5rem;" data-action="add-variant" data-product="${p.id}">${ICONS.plus} Ajouter une variante</button>
+    </div>
+  `;
+}
+
+function renderVariantRow(p, v){
+  const isPromo = v.currentStatus === 'promo';
+  const duration = daysBetween(v.statusSince, todayStr());
+  const warnDays = variantComplianceWarning(v);
+  const expanded = !!(state.omniExpanded && state.omniExpanded[v.id]);
+  return `
+    <div class="variant-row">
+      <div class="variant-top">
+        <input class="variant-name-input" value="${escapeHtml(v.name)}" data-action="rename-variant" data-product="${p.id}" data-variant="${v.id}">
+        <div class="variant-badges">
+          ${warnDays !== null ? `<span class="variant-warning" title="Seulement ${warnDays} jour(s) de prix normal avant cette promotion (recommandé : 30 jours minimum)">${ICONS.alertTri}</span>` : ''}
+          <span class="variant-status-dot" style="background:${isPromo?'var(--alert)':'var(--positive)'}"></span>
+          <span class="badge" style="color:${isPromo?'var(--alert)':'var(--positive)'};background:${isPromo?'var(--alert-soft)':'var(--positive-soft)'}">${isPromo?'En promo':'Prix normal'}</span>
+        </div>
+      </div>
+      <div class="variant-bottom">
+        <span class="variant-since">Depuis le ${fmtDateLong(v.statusSince)} · <strong>${duration} jour${duration>1?'s':''}</strong></span>
+        <div class="variant-actions">
+          <button class="btn btn-ghost btn-sm" data-action="toggle-variant-history" data-variant="${v.id}">${ICONS.chevronDown} Historique${v.history.length>1?` (${v.history.length})`:''}</button>
+          <button class="btn ${isPromo?'btn-ghost':'btn-primary'} btn-sm" data-action="toggle-variant-status" data-product="${p.id}" data-variant="${v.id}">${isPromo?'Repasser au prix normal':'Marquer en promo'}</button>
+          <button class="icon-btn danger" data-action="delete-variant" data-product="${p.id}" data-variant="${v.id}" title="Supprimer la variante">${ICONS.trash}</button>
+        </div>
+      </div>
+      ${expanded ? `
+        <div class="variant-history">
+          ${[...v.history].reverse().map(h => `<div class="variant-history-item"><span>${fmtDateLong(h.date)}</span><span>${h.status==='promo'?'Passage en promo':'Retour au prix normal'}</span></div>`).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function variantComplianceWarning(v){
+  if(v.currentStatus !== 'promo') return null;
+  const hist = v.history;
+  if(hist.length < 2) return null;
+  const prev = hist[hist.length - 2];
+  if(prev.status !== 'normal') return null;
+  const normalDuration = daysBetween(prev.date, v.statusSince);
+  return normalDuration < 30 ? normalDuration : null;
+}
+
+function findVariant(productId, variantId){
+  const p = state.omnibusProducts.find(x => x.id === productId);
+  if(!p) return null;
+  const v = p.variants.find(x => x.id === variantId);
+  return v ? { product: p, variant: v } : null;
+}
+
+function toggleVariantStatus(productId, variantId){
+  const found = findVariant(productId, variantId);
+  if(!found) return;
+  const { variant } = found;
+  const newStatus = variant.currentStatus === 'promo' ? 'normal' : 'promo';
+  const today = todayStr();
+  variant.history.push({ date: today, status: newStatus });
+  variant.currentStatus = newStatus;
+  variant.statusSince = today;
+  persistOmnibus();
+  toast(newStatus === 'promo' ? 'Variante marquée en promotion.' : 'Variante repassée au prix normal.', 'success');
+  renderView();
+}
+
+function addProduct(){
+  state.omnibusProducts.push({
+    id: uid(), name: 'Nouveau produit',
+    variants: [{ id: uid(), name:'Classique', currentStatus:'normal', statusSince:todayStr(), history:[{date:todayStr(), status:'normal'}] }]
+  });
+  persistOmnibus(); renderView();
+}
+function deleteProduct(productId){
+  state.omnibusProducts = state.omnibusProducts.filter(p => p.id !== productId);
+  persistOmnibus(); renderView();
+}
+function addVariant(productId){
+  const p = state.omnibusProducts.find(x => x.id === productId);
+  if(!p) return;
+  p.variants.push({ id: uid(), name:'Nouvelle variante', currentStatus:'normal', statusSince:todayStr(), history:[{date:todayStr(), status:'normal'}] });
+  persistOmnibus(); renderView();
+}
+function deleteVariant(productId, variantId){
+  const p = state.omnibusProducts.find(x => x.id === productId);
+  if(!p) return;
+  p.variants = p.variants.filter(v => v.id !== variantId);
+  persistOmnibus(); renderView();
+}
+function toggleVariantHistory(variantId){
+  if(!state.omniExpanded) state.omniExpanded = {};
+  state.omniExpanded[variantId] = !state.omniExpanded[variantId];
+  renderView();
+}
+
+/* ================= RÉGLAGES ================= */
+function renderReglages(){
+  return `
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Application</div>
+        <h1 class="page-title">Réglages</h1>
+      </div>
+    </div>
+
+    <div class="settings-stack">
+      <div class="card">
+        <div class="section-title">Général</div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">Confidentialité</div>
+            <div class="settings-sub">Application à usage interne — données confidentielles.</div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">Accès</div>
+            <div class="settings-sub">Verrouiller l'application sur cet appareil</div>
+          </div>
+          <button class="btn btn-ghost" data-action="lock-app">${ICONS.lock} Verrouiller</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          <span>Mise à jour</span>
+          <button class="version-pill-btn" data-action="toggle-changelog">v${APP_VERSION}</button>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">Statut</div>
+            <div class="settings-sub" id="update-status-text">${updateStatusText()}</div>
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+            ${state.updateCheck.status === 'available' ? `<button class="btn btn-primary" data-action="apply-update">${ICONS.sparkle} Mettre à jour</button>` : ''}
+            <button class="btn btn-ghost" data-action="check-update" ${state.updateCheck.status==='checking' ? 'disabled' : ''}>
+              ${ICONS.refresh} ${state.updateCheck.status === 'checking' ? 'Recherche…' : 'Rechercher une mise à jour'}
+            </button>
+          </div>
+        </div>
+        ${state.showChangelog ? `
+          <div class="changelog-list">
+            ${CHANGELOG.map(c => `
+              <div class="changelog-item">
+                <span class="changelog-version">v${c.version}</span><span class="changelog-date">${c.date}</span>
+                <div class="changelog-notes">${escapeHtml(c.notes)}</div>
+              </div>`).join('')}
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/* ================= EVENTS ================= */
+function attachGlobalHandlers(){
+  document.body.onclick = null; // avoid duplicate binding across re-shells
+  document.body.addEventListener('click', handleClick);
+  document.body.addEventListener('input', handleInput);
+  window.addEventListener('resize', () => positionPill(true));
+}
+
+function handleClick(e){
+  const el = e.target.closest('[data-action]');
+  if(!el){
+    if(e.target.id === 'offer-backdrop') closeModal();
+    return;
+  }
+  const action = el.dataset.action;
+
+  if(action === 'go-view'){
+    state.currentView = el.dataset.view;
+    saveJSON(STORAGE.view, state.currentView);
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    positionPill(false);
+    renderView(true);
+  }
+  else if(action === 'open-offer-modal') openOfferModal(null);
+  else if(action === 'edit-offer') openOfferModal(el.dataset.id);
+  else if(action === 'delete-offer') deleteOffer(el.dataset.id);
+  else if(action === 'save-offer') saveOfferFromModal(el.dataset.id || null);
+  else if(action === 'close-modal') closeModal();
+  else if(action === 'offres-view'){ state.offresViewMode = el.dataset.mode; renderView(); }
+  else if(action === 'cal-prev'){ shiftMonth(-1); }
+  else if(action === 'cal-next'){ shiftMonth(1); }
+  else if(action === 'cal-today'){ const n = new Date(); state.calMonth = { y:n.getFullYear(), m:n.getMonth() }; state.calSelected = todayStr(); renderView(); }
+  else if(action === 'cal-select'){ state.calSelected = state.calSelected === el.dataset.date ? null : el.dataset.date; renderView(); }
+  else if(action === 'open-marker-modal') openMarkerModal(el.dataset.date);
+  else if(action === 'save-marker') saveMarkerFromModal();
+  else if(action === 'delete-marker') deleteDayMarker(el.dataset.id);
+  else if(action === 'add-product') addProduct();
+  else if(action === 'delete-product') deleteProduct(el.dataset.product);
+  else if(action === 'add-variant') addVariant(el.dataset.product);
+  else if(action === 'delete-variant') deleteVariant(el.dataset.product, el.dataset.variant);
+  else if(action === 'toggle-variant-status') toggleVariantStatus(el.dataset.product, el.dataset.variant);
+  else if(action === 'toggle-variant-history') toggleVariantHistory(el.dataset.variant);
+  else if(action === 'lock-app') lockApp();
+  else if(action === 'check-update') checkForUpdate(true);
+  else if(action === 'apply-update') applyUpdate();
+  else if(action === 'toggle-changelog'){ state.showChangelog = !state.showChangelog; renderView(); }
+}
+
+function handleInput(e){
+  const el = e.target.closest('[data-action]');
+  if(!el) return;
+  const action = el.dataset.action;
+  if(action === 'rename-product'){
+    const p = state.omnibusProducts.find(x => x.id === el.dataset.product);
+    if(p){ p.name = el.value; persistOmnibus(); }
+  }
+  else if(action === 'rename-variant'){
+    const found = findVariant(el.dataset.product, el.dataset.variant);
+    if(found){ found.variant.name = el.value; persistOmnibus(); }
+  }
+}
+
+function shiftMonth(delta){
+  let { y, m } = state.calMonth;
+  m += delta;
+  if(m < 0){ m = 11; y--; } if(m > 11){ m = 0; y++; }
+  state.calMonth = { y, m };
+  renderView();
+}
+
+/* ================= INIT ================= */
+if(isUnlocked()){ renderShell(); resetInactivityTimer(); } else renderLock();
+</script>
+</body>
+</html>
